@@ -97,6 +97,17 @@ public class HanoiCountdownEntry implements EntryPoint {
 
   @SuppressWarnings("unchecked")
   private void init(final Date start, final Date end) {
+
+    for (int i = 0; i < pegsCount; i++) {
+      if (pegs != null && pegs[i] != null) {
+        pegs[i].removeAllElements();
+      }
+
+      if (pegsContainers != null && pegsContainers[i] != null) {
+        pegsContainers[i].clear();
+      }
+    }
+
     Date now = new Date();
 
     if (start.getTime() > now.getTime()) {
@@ -132,14 +143,6 @@ public class HanoiCountdownEntry implements EntryPoint {
      * styling details and add them to the parent container.
      */
     for (int i = 0; i < pegsCount; i++) {
-      if (pegs[i] != null) {
-        pegs[i].removeAllElements();
-      }
-      
-      if (pegsContainers[i] != null) {
-        pegsContainers[i].clear();
-      }
-      
       pegs[i] = new Stack<FlowPanel>();
       FlowPanel pegContainer = new FlowPanel();
       pegContainer.setStyleName("pegContainer");

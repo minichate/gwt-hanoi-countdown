@@ -7,10 +7,15 @@
     
     <style>
     
+    body {
+    	background-image: url(/texture.png) !important;
+    }
+    
     #towers {
     	margin-top: 16px;
     	padding: 0 16px 0 16px;
     	height: 350px;
+    	-webkit-box-reflect: below 2px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(rgba(255,255,255,0.1)));
     }
     
     #controls {
@@ -26,6 +31,11 @@
     	background-image: url(/post.png);
     	background-position: center center;
     	background-repeat: repeat-y;
+    }
+    
+    .pegContainer div {
+    	background-image: url(/texture.png);
+    	border: 1px solid rgba(0,0,0,0.3);
     }
     
     .disk {

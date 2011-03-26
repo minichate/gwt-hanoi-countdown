@@ -132,6 +132,14 @@ public class HanoiCountdownEntry implements EntryPoint {
      * styling details and add them to the parent container.
      */
     for (int i = 0; i < pegsCount; i++) {
+      if (pegs[i] != null) {
+        pegs[i].removeAllElements();
+      }
+      
+      if (pegsContainers[i] != null) {
+        pegsContainers[i].clear();
+      }
+      
       pegs[i] = new Stack<FlowPanel>();
       FlowPanel pegContainer = new FlowPanel();
       pegContainer.setStyleName("pegContainer");

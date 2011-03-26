@@ -13,17 +13,42 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import java.util.Date;
 import java.util.Stack;
 
+/**
+ * Last Call for Google I/O submission. This is a reimagining of the countdown
+ * clock at http://www.google.com/events/io/2010/ built with GWT and using
+ * webkit animations. The clock is represented by the Towers of Hanoi problem
+ * and reaches 0-hour when all disks are stacked on the rightmost peg.
+ * 
+ * @author Christopher Troup
+ * 
+ */
 public class HanoiCountdownEntry implements EntryPoint {
 
+  /*
+   * How many moves into the process are we?
+   */
   int count = 0;
+
+  /*
+   * Array of disks stacked on pegs.
+   */
   Stack<FlowPanel>[] pegs;
-  int padding = 32;
-  int minDiskWidth = 60;
+
+  /*
+   * Calculated height of each disk
+   */
   int diskHeight;
 
+  /*
+   * The container panels for the pegs
+   */
   FlowPanel[] pegsContainers;
 
-  int disks = 25;
+  /*
+   * Number of disks required so that about 1 move is made every second.
+   */
+  int disks;
+
   int pegsCount = 3;
 
   Timer t;
@@ -91,7 +116,6 @@ public class HanoiCountdownEntry implements EntryPoint {
     final Double totalMoves = Math.pow(2, disks) - 1;
 
     count = (int) (totalMoves * (((double) secondsDiff - (double) untilEnd) / (double) secondsDiff));
-    // count = (int) (totalMoves - untilEnd);
     int moveEveryNMilliSeconds = (int) (1000 * secondsDiff / (totalMoves));
     if (moveEveryNMilliSeconds <= 0)
       moveEveryNMilliSeconds = 1000;
@@ -103,6 +127,10 @@ public class HanoiCountdownEntry implements EntryPoint {
     RootPanel.get("towers").clear();
     RootPanel.get("towers").add(container);
 
+    /*
+     * Initial setup of the pegs themselves. Create the FlowPanels, add some
+     * styling details and add them to the parent container.
+     */
     for (int i = 0; i < pegsCount; i++) {
       pegs[i] = new Stack<FlowPanel>();
       FlowPanel pegContainer = new FlowPanel();
@@ -111,6 +139,7 @@ public class HanoiCountdownEntry implements EntryPoint {
       container.add(pegContainer);
 
       if (i != (pegsCount - 1)) {
+        // Add some padding if this isn't the last peg.
         pegContainer.getElement().getStyle().setMarginRight(2, Unit.PCT);
       }
     }
@@ -118,13 +147,22 @@ public class HanoiCountdownEntry implements EntryPoint {
     String[] colors = new String[] {
         "#1b53f7", "#ed2833", "#feb513", "#205afc", "#00a516", "#ec2632"};
 
+    /*
+     * Initialize the disks. Add them to the proper peg using the calculation
+     * from the diskPosition() method.
+     */
     for (int j = disks; j > 0; j--) {
       FlowPanel disk = new FlowPanel();
       disk.getElement().getStyle().setBackgroundColor(
           colors[(disks - j) % colors.length]);
       disk.setStyleName("disk");
 
-      Double w = (double) ((j) * 100 / disks);
+      Double w;
+      if (disks > 0) {
+        w = ((j) * 100 / (double) disks);
+      } else {
+        w = 100.0;
+      }
 
       disk.setHeight(diskHeight + "px");
       disk.setWidth(w + "%");
@@ -146,18 +184,35 @@ public class HanoiCountdownEntry implements EntryPoint {
       @Override
       public void run() {
         if (count + 1 > totalMoves) {
+          /*
+           * Done! Add a CSS class to animate the result, then bail out.
+           * Congrats, see you at I/O!
+           */
           container.setStyleName("done");
           cancel();
           return;
         }
 
+        /*
+         * Re-calculate the number of moves remaining and therefore how long we
+         * should wait until making the next move so that the average delay is
+         * about 1 second.
+         */
         Date now = new Date();
         long secondsDiff = (end.getTime() - now.getTime()) / 1000;
         int nextMove = (int) (1000 * secondsDiff / (totalMoves - count));
 
         if (nextMove <= 0)
+          /*
+           * Next move will be out last. Lets just all agree that worst case its
+           * OK to be 1 second off :)
+           */
           nextMove = 1000;
 
+        /*
+         * Use iterative solution to problem instead of recursion, since we want
+         * to insert delays between actual moves.
+         */
         int x = ++count;
         int from = (x & x - 1) % 3;
         int to = ((x | x - 1) + 1) % 3;
@@ -169,21 +224,44 @@ public class HanoiCountdownEntry implements EntryPoint {
     t.schedule(moveEveryNMilliSeconds);
   }
 
+  /**
+   * Calculate the initial position (peg) of a desk n moves into the game.
+   * 
+   * @param move Number moves into the game
+   * @param disk Disk to calculate for
+   * @return The peg the disk should be sitting on
+   */
   private int diskPosition(int move, int disk) {
     return ((((disks + disk + 1) % 2) + 1) * ((move + (int) Math.pow(2,
         disk - 1)) / (int) (Math.pow(2, disk)))) % 3;
   }
 
+  /**
+   * Move the actual disk from one peg to another.
+   * 
+   * @param from The peg to move topmost disk from
+   * @param to The peg to move the disk to
+   */
   private void move(final int from, final int to) {
     Stack<FlowPanel> fromPeg = pegs[from];
     Stack<FlowPanel> toPeg = pegs[to];
 
+    /*
+     * Pop a peg from the FROM stack and push it onto the TO stack.
+     */
     final FlowPanel disk = fromPeg.pop();
     toPeg.push(disk);
 
+    /*
+     * Used for webkit animations.
+     */
     disk.removeStyleName("come_back");
     disk.addStyleName("go_away");
 
+    /*
+     * Delay drawing the add/remove step by a bit so that the animation has time
+     * to show off.
+     */
     Timer go_away = new Timer() {
 
       @Override

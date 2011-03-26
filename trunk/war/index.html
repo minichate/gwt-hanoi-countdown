@@ -5,21 +5,108 @@
     <title>index</title>
     <script type="text/javascript" language="javascript" src="hanoicountdown/hanoicountdown.nocache.js"></script>
     
+    <link href="http://fonts.googleapis.com/css?family=Droid+Sans:regular,bold" rel="stylesheet" type="text/css" >
+
     <style>
     
     body {
     	background-image: url(/texture.png) !important;
+    	padding: 16px !important;
+    	font-family: 'Droid Sans', serif !important;
+    }
+    
+    h1 {
+    	font-size: 48px;
+    	margin: 0;
+    }
+    
+    @-webkit-keyframes fade {
+  		0% { 
+  			opacity: 1; 
+			top: 0px;
+			-webkit-transform: rotate(0deg);
+  		}
+  		
+  		10% { 
+  			opacity: 0.8; 
+  			-webkit-transform: rotate(12deg);
+  		}
+  		
+  		100% {
+  			opacity: 0; 
+			top: 200px;
+  		}
+	}
+	
+	@-webkit-keyframes appear {
+  		0% { 
+  			opacity: 0; 
+  			-webkit-transform: rotate(12deg);
+  			top: 200px;
+  		}
+  		
+  		90% { 
+  			opacity: 0.8; 
+  		}
+  		
+  		100% { 
+  			opacity: 1; 
+  			-webkit-transform: rotate(0deg);
+  			top: 0px;
+  		}
+	}
+	
+	@-webkit-keyframes blink {
+ 		from {
+   			opacity: 0.5;
+ 		}
+ 		
+ 		to {
+   			opacity: 1;
+ 		}
+	}
+	
+	.first_time {
+	}
+    
+    .go_away {
+    	position: relative;
+    	-webkit-animation: fade 0.2s 1;
+    }
+    
+    .come_back {
+    	position: relative;
+    	-webkit-animation: appear 0.2s 1;
+    }
+    
+    .done {
+    	-webkit-animation: blink 1s infinite;
+    	-webkit-animation-direction: alternate;
     }
     
     #towers {
     	margin-top: 16px;
-    	padding: 0 16px 0 16px;
     	height: 350px;
-    	-webkit-box-reflect: below 2px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(rgba(255,255,255,0.1)));
+    	/* -webkit-box-reflect: below 2px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(rgba(255,255,255,0.1))); */
     }
     
     #controls {
     	clear: both;
+    }
+    
+    #controls .gwt-Label {
+    	display: inline;
+    	margin-right: 4px;
+    	font-weight: bold;
+    }
+    
+    #controls input.gwt-DateBox {
+    	margin-right: 32px;
+    	background-color: #1b53f7;
+    	color: #fff;
+    	border: none;
+    	width: 145px;
+    	border-radius: 4px;
     }
     
     .pegContainer {
@@ -33,12 +120,8 @@
     	background-repeat: repeat-y;
     }
     
-    .pegContainer div {
-    	background-image: url(/texture.png);
-    	border: 1px solid rgba(0,0,0,0.3);
-    }
-    
     .disk {
+    	box-shadow:inset 0 0 12px rgba(255,255,255,0.7);
     	margin: 0 auto;
     	border-radius: 6px;
     }
@@ -48,8 +131,15 @@
   <body>
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
     
+    <h1>Hanoi Countdown to Google I/O 2011!</h1>
+    <p>This countdown uses the classic Towers of Hanoi problem to display a countdown to a specific date and time. When all the disks have been stacked on the rightmost peg the event has started!
+    The number of disks required is calculated by determining the number of moves needed to perform about one move per second. GWT 2.1 was used to 
+    perform all logic, while webkit keyframes were used to perform animations.</p>
+    
     <div id="towers">
     </div>
+    
+    <p>Below are some controls to allow you to choose the start and end date and time for the countdown.</p>
     
     <div id="controls">
     </div>

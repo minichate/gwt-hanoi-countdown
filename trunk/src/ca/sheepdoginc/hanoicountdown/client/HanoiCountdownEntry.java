@@ -1,16 +1,14 @@
 package ca.sheepdoginc.hanoicountdown.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
-import com.google.gwt.user.datepicker.client.DatePicker;
 
 import java.util.Date;
 import java.util.Stack;
@@ -27,48 +25,58 @@ public class HanoiCountdownEntry implements EntryPoint {
 
   int disks = 25;
   int pegsCount = 3;
-  
+
   Timer t;
 
+  @SuppressWarnings("deprecation")
   @Override
   public void onModuleLoad() {
     Date end = new Date("Tue, 10 May 2011 09:00:00 MST");
-    //Date end = new Date("Fri, 25 Mar 2011 20:05:00 EST");
     Date start = new Date("Tue, 10 May 2010 09:00:00 MST");
-    //Date start = new Date("Fri, 25 Mar 2011 17:00:00 EST");
-    
+
     final DateBox startPick = new DateBox();
     startPick.setValue(start);
-    
+
     final DateBox endPick = new DateBox();
     endPick.setValue(end);
-    
+
     startPick.addValueChangeHandler(new ValueChangeHandler<Date>() {
-      
+
       @Override
       public void onValueChange(ValueChangeEvent<Date> event) {
-        if (t != null) t.cancel();
+        if (t != null)
+          t.cancel();
         init(event.getValue(), endPick.getValue());
       }
     });
-    
+
     endPick.addValueChangeHandler(new ValueChangeHandler<Date>() {
-      
+
       @Override
       public void onValueChange(ValueChangeEvent<Date> event) {
-        if (t != null) t.cancel();
+        if (t != null)
+          t.cancel();
         init(startPick.getValue(), event.getValue());
       }
     });
-    
-    RootPanel.get("controls").add(startPick);
-    RootPanel.get("controls").add(endPick);
-    
+
+    RootPanel controls = RootPanel.get("controls");
+    controls.add(new Label("Start Date and Time:"));
+    controls.add(startPick);
+
+    controls.add(new Label("End Date and Time:"));
+    controls.add(endPick);
+
     init(start, end);
   }
 
+  @SuppressWarnings("unchecked")
   private void init(final Date start, final Date end) {
     Date now = new Date();
+
+    if (start.getTime() > now.getTime()) {
+      start.setTime(now.getTime() - 1);
+    }
 
     long secondsDiff = (end.getTime() - start.getTime()) / 1000;
     long untilEnd = (end.getTime() - now.getTime()) / 1000;
@@ -82,15 +90,16 @@ public class HanoiCountdownEntry implements EntryPoint {
 
     final Double totalMoves = Math.pow(2, disks) - 1;
 
-    count = (int) (totalMoves - untilEnd);
+    count = (int) (totalMoves * (((double) secondsDiff - (double) untilEnd) / (double) secondsDiff));
+    // count = (int) (totalMoves - untilEnd);
     int moveEveryNMilliSeconds = (int) (1000 * secondsDiff / (totalMoves));
     if (moveEveryNMilliSeconds <= 0)
       moveEveryNMilliSeconds = 1000;
 
-    FlowPanel container = new FlowPanel();
+    final FlowPanel container = new FlowPanel();
 
     diskHeight = 350 / disks;
-    
+
     RootPanel.get("towers").clear();
     RootPanel.get("towers").add(container);
 
@@ -126,6 +135,8 @@ public class HanoiCountdownEntry implements EntryPoint {
         pos = 2;
       }
 
+      disk.addStyleName("first_time");
+
       pegsContainers[pos].add(disk);
       pegs[pos].add(disk);
     }
@@ -135,7 +146,7 @@ public class HanoiCountdownEntry implements EntryPoint {
       @Override
       public void run() {
         if (count + 1 > totalMoves) {
-          Window.alert("Done!");
+          container.setStyleName("done");
           cancel();
           return;
         }
@@ -163,15 +174,28 @@ public class HanoiCountdownEntry implements EntryPoint {
         disk - 1)) / (int) (Math.pow(2, disk)))) % 3;
   }
 
-  private void move(int from, int to) {
+  private void move(final int from, final int to) {
     Stack<FlowPanel> fromPeg = pegs[from];
     Stack<FlowPanel> toPeg = pegs[to];
 
-    FlowPanel disk = fromPeg.pop();
+    final FlowPanel disk = fromPeg.pop();
     toPeg.push(disk);
 
-    pegsContainers[from].remove(disk);
-    pegsContainers[to].add(disk);
+    disk.removeStyleName("come_back");
+    disk.addStyleName("go_away");
+
+    Timer go_away = new Timer() {
+
+      @Override
+      public void run() {
+        disk.removeStyleName("go_away");
+        disk.addStyleName("come_back");
+        pegsContainers[from].remove(disk);
+        pegsContainers[to].add(disk);
+      }
+    };
+    go_away.schedule(170);
+
   }
 
 }

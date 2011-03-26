@@ -15,7 +15,7 @@ import java.util.Stack;
 
 /**
  * Last Call for Google I/O submission. This is a reimagining of the countdown
- * clock at http://www.google.com/events/io/2010/ built with GWT and using
+ * clock at http://www.google.com/events/io/2011/ built with GWT and using
  * webkit animations. The clock is represented by the Towers of Hanoi problem
  * and reaches 0-hour when all disks are stacked on the rightmost peg.
  * 
